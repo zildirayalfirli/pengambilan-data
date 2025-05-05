@@ -1,0 +1,16 @@
+# Node modules
+node_modules/
+
+# dotenv file (jangan pernah upload file ini!)
+.env
+
+# log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS/mac files
+.DS_Store
+
+# Optional VSCode settings
+.vscode/

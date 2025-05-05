@@ -1,0 +1,32 @@
+name: Fetch Weather Data
+
+on:
+  schedule:
+    - cron: '0 13 * * *'  # 06:00 WIB
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+
+    env:
+      API_URL: ${{ secrets.API_URL }}
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      EMAIL_USER: ${{ secrets.EMAIL_USER }}
+      EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+      EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run fetch
+      run: node scripts/githubFetch.js
