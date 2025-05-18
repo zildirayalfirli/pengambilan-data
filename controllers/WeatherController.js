@@ -5,13 +5,13 @@ import Temperature from '../models/temperature.js'
 import Weather from '../models/weather.js'
 import Wind from '../models/wind.js'
 
-export const fetchAndStoreDataDirect = async () => {
+export const fetchAndStoreDataDirectWeather = async () => {
   try {
-    console.log('🟢 [Direct] Mulai fetch dari API')
+    console.log('🟢 [Direct] Mulai fetch data cuaca dari API')
     const response = await axios.get(process.env.API_URL)
 
     const cuaca = response.data.data[0]?.cuaca?.flat()
-    if (!cuaca) throw new Error('Data cuaca kosong')
+    if (!cuaca) throw new Error('Data cuaca tidak valid atau kosong')
 
     await Promise.all([
       Humidity.deleteMany({}),
@@ -19,12 +19,15 @@ export const fetchAndStoreDataDirect = async () => {
       Weather.deleteMany({}),
       Wind.deleteMany({})
     ])
-    console.log('🗑️ Semua data lama berhasil dihapus')
+    console.log('🗑️ Semua data lama cuaca berhasil dihapus')
+
+    const gmt7OffsetMs = 7 * 60 * 60 * 1000;
+    let successCount = 0;
 
     for (const item of cuaca) {
       const common = {
         Timestamp: new Date(),
-        Datetime: new Date(item.datetime)
+        Datetime: new Date(new Date(item.datetime).getTime() + gmt7OffsetMs)
       }
 
       await Promise.all([
@@ -38,8 +41,11 @@ export const fetchAndStoreDataDirect = async () => {
           Wind_To: item.wd_to,
           Wind_Speed: item.ws
         })
-      ])
+      ]);
+      successCount++;
     }
+
+    console.log(`✅ Berhasil menyimpan ${successCount} data cuaca`);
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -53,11 +59,11 @@ export const fetchAndStoreDataDirect = async () => {
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_RECEIVER,
       subject: 'Weather Data Updated',
-      text: `Data cuaca berhasil diperbarui dan disimpan ke MongoDB.`
-    })
+      text: `Data cuaca sebanyak ${successCount} berhasil diperbarui dan disimpan ke MongoDB.`
+    });
 
-    console.log('📧 [Direct] Email berhasil dikirim')
+    console.log('📧 [Direct] Email notifikasi cuaca berhasil dikirim')
   } catch (err) {
-    console.error('❌ [Direct] Gagal fetch & simpan:', err.message)
+    console.error('❌ [Direct] Gagal fetch/simpan cuaca:', err.message)
   }
 }
