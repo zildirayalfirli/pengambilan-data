@@ -15,6 +15,9 @@ jobs:
       EMAIL_USER: ${{ secrets.EMAIL_USER }}
       EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
       EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
+      API_URL_PERAIRAN: ${{ secrets.API_URL_PERAIRAN }}
+      API_URL_PRESSURE: ${{ secrets.API_URL_PRESSURE }}
+      API_URL_TIDE: ${{ secrets.API_URL_TIDE }}
 
     steps:
     - name: Checkout
