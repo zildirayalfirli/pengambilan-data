@@ -12,6 +12,14 @@ const weatherSchema = new mongoose.Schema({
   Weathers_Category: {
     type: String,
     required: true
+  },
+    Air_Humidity: {
+    type: Number,
+    required: true
+  },
+    Temperature: {
+    type: Number,
+    required: true
   }
 })
 

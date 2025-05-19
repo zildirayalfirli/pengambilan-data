@@ -33,7 +33,12 @@ export const fetchAndStoreDataDirectWeather = async () => {
       await Promise.all([
         Humidity.create({ ...common, Air_Humidity: item.hu }),
         Temperature.create({ ...common, Temperature: item.t }),
-        Weather.create({ ...common, Weathers_Category: item.weather_desc }),
+        Weather.create({
+          ...common, 
+          Weathers_Category: item.weather_desc, 
+          Air_Humidity: item.hu,
+          Temperature: item.t
+        }),
         Wind.create({
           ...common,
           Degrees_Wind: item.wd_deg,
