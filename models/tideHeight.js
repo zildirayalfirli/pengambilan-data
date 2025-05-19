@@ -9,7 +9,7 @@ const tideHeightSchema = new mongoose.Schema({
         type: Date,
         required: true
   },
-    Tide_height: {
+    Tide_Height: {
         type: Number,
         required: true
   }

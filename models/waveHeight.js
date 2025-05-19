@@ -9,11 +9,11 @@ const waveHeightSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
-    Wave_category: {
+    Wave_Category: {
     type: String,
     required: true
   },
-    Wave_height: {
+    Wave_Height: {
     type: String,
     required: true
   },

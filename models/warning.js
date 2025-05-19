@@ -9,7 +9,7 @@ const warningSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    Warning: {
+    Warning_Desc: {
         type: String,
         required: true
     }

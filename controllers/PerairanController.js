@@ -29,11 +29,11 @@ export const fetchAndStoreDataPerairanDirect = async () => {
       };
 
       await Promise.all([
-        Warning.create({ ...common, Warning: item.warning_desc }),
+        Warning.create({ ...common, Warning_Desc: item.warning_desc }),
         WaveHeight.create({
           ...common,
-          Wave_category: item.wave_cat,
-          Wave_height: item.wave_desc,
+          Wave_Category: item.wave_cat,
+          Wave_Height: item.wave_desc,
         })
       ]);
       successCount++;

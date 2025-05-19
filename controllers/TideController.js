@@ -24,7 +24,7 @@ export const fetchAndStoreDataTideDirect = async () => {
     return {
         Timestamp: new Date(),
         Datetime: correctedTime,
-        Tide_height: tides[index]
+        Tide_Height: tides[index]
     };
     });
 
