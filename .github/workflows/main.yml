@@ -1,4 +1,4 @@
-name: Fetch Data
+name: Otomatisasi Data
 
 on:
   schedule:
