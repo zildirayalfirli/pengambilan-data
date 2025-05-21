@@ -13,14 +13,6 @@ const weatherSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-    Air_Humidity: {
-    type: Number,
-    required: true
-  },
-    Temperature: {
-    type: Number,
-    required: true
-  }
 })
 
 export default mongoose.model('Weather', weatherSchema)

@@ -36,8 +36,6 @@ export const fetchAndStoreDataDirectWeather = async () => {
         Weather.create({
           ...common, 
           Weathers_Category: item.weather_desc, 
-          Air_Humidity: item.hu,
-          Temperature: item.t
         }),
         Wind.create({
           ...common,
