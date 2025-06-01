@@ -14,18 +14,28 @@ export const fetchAndStoreDataPressureDirect = async () => {
       throw new Error('Data surface pressure tidak valid atau kosong');
     }
 
+    const gmt7OffsetMs = 7 * 60 * 60 * 1000;
+    const newDatetime = new Date(new Date(times[0]).getTime() + gmt7OffsetMs);
+
+    const existingData = await SurfacePressure.findOne();
+
+    if (existingData && new Date(existingData.Datetime).getTime() === newDatetime.getTime()) {
+      console.log('⏹️ Data surface pressure belum berubah, tidak dilakukan pembaruan');
+      return;
+    }
+
     await SurfacePressure.deleteMany({});
-    console.log('🗑️ Semua data lama surface pressure lama berhasil dihapus');
+    console.log('🗑️ Data lama surface pressure dihapus karena ada pembaruan');
 
     const entries = times.map((time, index) => {
-    const originalTime = new Date(time);
-    const correctedTime = new Date(originalTime.getTime() + (7 * 60 * 60 * 1000));
+      const originalTime = new Date(time);
+      const correctedTime = new Date(originalTime.getTime() + gmt7OffsetMs);
 
-    return {
+      return {
         Timestamp: new Date(),
         Datetime: correctedTime,
         Surface_Pressure: pressures[index]
-    };
+      };
     });
 
     await SurfacePressure.insertMany(entries);

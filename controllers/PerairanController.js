@@ -6,40 +6,49 @@ import WaveHeight from '../models/waveHeight.js'
 export const fetchAndStoreDataPerairanDirect = async () => {
   try {
     console.log('🟢 [Direct] Mulai fetch data perairan dari API')
-    const response = await axios.get(process.env.API_URL_PERAIRAN);
+    const response = await axios.get(process.env.API_URL_PERAIRAN)
 
-    const perairan = response.data.data;
+    const perairan = response.data.data
     if (!Array.isArray(perairan) || perairan.length === 0) {
-    throw new Error('Data perairan tidak valid atau kosong');
+      throw new Error('Data perairan tidak valid atau kosong')
+    }
+
+    const gmt7OffsetMs = 7 * 60 * 60 * 1000
+    const newDatetime = new Date(new Date(perairan[0].valid_from).getTime() + gmt7OffsetMs)
+
+    const existingData = await Warning.findOne()
+
+    if (existingData && new Date(existingData.Datetime).getTime() === newDatetime.getTime()) {
+      console.log('⏹️ Data perairan belum berubah, tidak dilakukan pembaruan')
+      return
     }
 
     await Promise.all([
       Warning.deleteMany({}),
-      WaveHeight.deleteMany({}),
+      WaveHeight.deleteMany({})
     ])
-    console.log('🗑️ Semua data lama perairan berhasil dihapus')
+    console.log('🗑️ Data lama perairan dihapus karena ada pembaruan')
 
-    const gmt7OffsetMs = 7 * 60 * 60 * 1000;
-    let successCount = 0;
+    let successCount = 0
 
     for (const item of perairan) {
       const common = {
         Timestamp: new Date(),
         Datetime: new Date(new Date(item.valid_from).getTime() + gmt7OffsetMs)
-      };
+      }
 
       await Promise.all([
         Warning.create({ ...common, Warning_Desc: item.warning_desc }),
         WaveHeight.create({
           ...common,
           Wave_Category: item.wave_cat,
-          Wave_Height: item.wave_desc,
+          Wave_Height: item.wave_desc
         })
-      ]);
-      successCount++;
+      ])
+      successCount++
     }
 
-    console.log(`✅ Berhasil menyimpan ${successCount} data perairan`);
+    console.log(`✅ Berhasil menyimpan ${successCount} data perairan`)
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -54,7 +63,7 @@ export const fetchAndStoreDataPerairanDirect = async () => {
       to: process.env.EMAIL_RECEIVER,
       subject: 'Perairan Data Updated',
       text: `Data perairan sebanyak ${successCount} berhasil diperbarui dan disimpan ke MongoDB.`
-    });
+    })
 
     console.log('📧 [Direct] Email notifikasi perairan berhasil dikirim')
   } catch (err) {

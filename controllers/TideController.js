@@ -14,18 +14,28 @@ export const fetchAndStoreDataTideDirect = async () => {
       throw new Error('Data tide height tidak valid atau kosong');
     }
 
+    const gmt7OffsetMs = 7 * 60 * 60 * 1000;
+    const newDatetime = new Date(new Date(times[0]).getTime() + gmt7OffsetMs);
+
+    const existingData = await TideHeight.findOne();
+
+    if (existingData && new Date(existingData.Datetime).getTime() === newDatetime.getTime()) {
+      console.log('⏹️ Data tide height belum berubah, tidak dilakukan pembaruan');
+      return;
+    }
+
     await TideHeight.deleteMany({});
-    console.log('🗑️ Semua data lama tide height lama berhasil dihapus');
+    console.log('🗑️ Data lama tide height dihapus karena ada pembaruan');
 
     const entries = times.map((time, index) => {
-    const originalTime = new Date(time);
-    const correctedTime = new Date(originalTime.getTime() + (7 * 60 * 60 * 1000));
-
-    return {
+      const originalTime = new Date(time);
+      const correctedTime = new Date(originalTime.getTime() + gmt7OffsetMs);
+      
+      return {
         Timestamp: new Date(),
         Datetime: correctedTime,
         Tide_Height: tides[index]
-    };
+      };
     });
 
     await TideHeight.insertMany(entries);

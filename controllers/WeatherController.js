@@ -11,7 +11,17 @@ export const fetchAndStoreDataDirectWeather = async () => {
     const response = await axios.get(process.env.API_URL)
 
     const cuaca = response.data.data[0]?.cuaca?.flat()
-    if (!cuaca) throw new Error('Data cuaca tidak valid atau kosong')
+    if (!cuaca || cuaca.length === 0) throw new Error('Data cuaca tidak valid atau kosong')
+
+    const gmt7OffsetMs = 7 * 60 * 60 * 1000
+    const newDatetime = new Date(new Date(cuaca[0].datetime).getTime() + gmt7OffsetMs)
+
+    const existingData = await Humidity.findOne()
+
+    if (existingData && new Date(existingData.Datetime).getTime() === newDatetime.getTime()) {
+      console.log('⏹️ Data cuaca belum berubah, tidak dilakukan pembaruan')
+      return
+    }
 
     await Promise.all([
       Humidity.deleteMany({}),
@@ -19,10 +29,9 @@ export const fetchAndStoreDataDirectWeather = async () => {
       Weather.deleteMany({}),
       Wind.deleteMany({})
     ])
-    console.log('🗑️ Semua data lama cuaca berhasil dihapus')
+    console.log('🗑️ Data lama cuaca dihapus karena ada pembaruan')
 
-    const gmt7OffsetMs = 7 * 60 * 60 * 1000;
-    let successCount = 0;
+    let successCount = 0
 
     for (const item of cuaca) {
       const common = {
@@ -33,10 +42,7 @@ export const fetchAndStoreDataDirectWeather = async () => {
       await Promise.all([
         Humidity.create({ ...common, Air_Humidity: item.hu }),
         Temperature.create({ ...common, Temperature: item.t }),
-        Weather.create({
-          ...common, 
-          Weathers_Category: item.weather_desc, 
-        }),
+        Weather.create({ ...common, Weathers_Category: item.weather_desc }),
         Wind.create({
           ...common,
           Degrees_Wind: item.wd_deg,
@@ -44,11 +50,11 @@ export const fetchAndStoreDataDirectWeather = async () => {
           Wind_To: item.wd_to,
           Wind_Speed: item.ws
         })
-      ]);
-      successCount++;
+      ])
+      successCount++
     }
 
-    console.log(`✅ Berhasil menyimpan ${successCount} data cuaca`);
+    console.log(`✅ Berhasil menyimpan ${successCount} data cuaca`)
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -63,7 +69,7 @@ export const fetchAndStoreDataDirectWeather = async () => {
       to: process.env.EMAIL_RECEIVER,
       subject: 'Weather Data Updated',
       text: `Data cuaca sebanyak ${successCount} berhasil diperbarui dan disimpan ke MongoDB.`
-    });
+    })
 
     console.log('📧 [Direct] Email notifikasi cuaca berhasil dikirim')
   } catch (err) {
